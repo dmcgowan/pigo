@@ -1,7 +1,7 @@
-gorpi
+PiGo
 =====
 
-Go library for Raspberry Pi
+Go library for Raspberry Pi GPIO
 
 Reference
 ---------
@@ -20,7 +20,7 @@ sample.go (*go run sample.go -d 7* will set gpio 7, 8, 9 high and 10, 11, 14, 15
 		package main
 
 		import (
-			"github.com/dmcgowan/gorpi/gpio"
+			"github.com/dmcgowan/pigo"
 			"flag"
 		)
 
@@ -28,22 +28,22 @@ sample.go (*go run sample.go -d 7* will set gpio 7, 8, 9 high and 10, 11, 14, 15
 
 		func main() {
 			flag.Parse()
-			gpio.Setup()
-			defer gpio.Teardown()
+			pigo.Setup()
+			defer pigo.Teardown()
 	
 			output_bits := [8]uint{7, 8, 9, 10, 11, 14, 15, 17}
 
 			for _, bit := range output_bits {
-				gpio.FunctionSelect(bit, gpio.OUTPUT)
+				pigo.FunctionSelect(bit, pigo.OUTPUT)
 			}
 
 			value := byte(*display_value)
 	
 			for i := uint(0); i < 8 ; i++ {
 				if (value >> i & 0x01) == 0 {
-					gpio.ClearOutput(output_bits[i])
+					pigo.ClearOutput(output_bits[i])
 				} else {
-					gpio.SetOutput(output_bits[i])
+					pigo.SetOutput(output_bits[i])
 				}
 	
 			}
