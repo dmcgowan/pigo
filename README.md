@@ -22,7 +22,7 @@ sample.go (*go run sample.go -d 7* will set gpio 7, 8, 9 high and 10, 11, 14, 15
 		import (
 			"github.com/dmcgowan/pigo"
 			"flag"
-                        "log"
+			"log"
 		)
 
 		var display_value = flag.Int("d", 0, "Value to display on led")
@@ -44,6 +44,6 @@ sample.go (*go run sample.go -d 7* will set gpio 7, 8, 9 high and 10, 11, 14, 15
 			value := pigo.Value(*display_value)
                         
 			for i := uint(0); i < 8 ; i++ {
-                                gp.SetValue(output_bits[i], (value >> i & 0x01))
+				gp.SetValue(output_bits[i], (value >> i & 0x01))
 			}
 		}
