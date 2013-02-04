@@ -6,34 +6,36 @@ import (
 	"unsafe"
 )
 
-var mmap_ptr uintptr
-
-func Setup() {
+func NewMmapGPIO() (*MmapGPIO, error) {
 	mem_fd, mem_err := syscall.Open("/dev/mem", syscall.O_RDWR|syscall.O_SYNC, 0)
 	if mem_err != nil {
-		log.Panicln("Error opening /dev/mem:", mem_err)
+		log.Println("Error opening /dev/mem:", mem_err)
+		return nil, mem_err
 	}
-
+	
 	addr, _, map_err := syscall.Syscall6(syscall.SYS_MMAP2, uintptr(0), uintptr(GPIO_REGISTER_SIZE), uintptr(syscall.PROT_READ|syscall.PROT_WRITE), uintptr(syscall.MAP_SHARED), uintptr(mem_fd), uintptr(GPIO_REGISTER_BASE/PAGE_SIZE))
 	if map_err != 0 {
-		log.Panicln("Error mmap:", map_err)
+		log.Println("Error mmap:", map_err)
+		return nil, map_err
 	}
-
+	
 	// Slice memory layout
 	var addr_slice = struct {
 		addr uintptr
 		len  int
 		cap  int
 	}{addr, GPIO_REGISTER_SIZE / 4, GPIO_REGISTER_SIZE / 4}
-
+	
+	gpio := new(MmapGPIO)
+	
 	// Use unsafe to turn sl into a []uint32.
-	gpio_map = *(*[]uint32)(unsafe.Pointer(&addr_slice))
-	mmap_ptr = addr
+	gpio.registers = *(*[]uint32)(unsafe.Pointer(&addr_slice))
+	gpio.mmapPtr = addr
+	
+	return gpio, nil
 }
 
-func Teardown() {
-	_, _, munmap_err := syscall.Syscall(syscall.SYS_MUNMAP, uintptr(mmap_ptr), uintptr(GPIO_REGISTER_SIZE), 0)
-	if munmap_err != 0 {
-		log.Panicln("Error unmapping memory:", munmap_err)
-	}
+func (gpio * MmapGPIO) Close() error {
+   _, _, munmap_err := syscall.Syscall(syscall.SYS_MUNMAP, uintptr(gpio.mmapPtr), uintptr(GPIO_REGISTER_SIZE), 0)
+	return munmap_err
 }
