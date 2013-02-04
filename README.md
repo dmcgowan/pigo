@@ -22,29 +22,28 @@ sample.go (*go run sample.go -d 7* will set gpio 7, 8, 9 high and 10, 11, 14, 15
 		import (
 			"github.com/dmcgowan/pigo"
 			"flag"
+                        "log"
 		)
 
 		var display_value = flag.Int("d", 0, "Value to display on led")
 
 		func main() {
 			flag.Parse()
-			pigo.Setup()
-			defer pigo.Teardown()
-	
-			output_bits := [8]uint{7, 8, 9, 10, 11, 14, 15, 17}
-
+                        gp, err := pigo.NewMmapGPIO() // Actually do something with this error
+                        if err != nil {
+                                log.Fatalln(err)
+                        }
+                        defer gp.Close()
+                        
+			output_bits := [8]pigo.PinNumber{7, 8, 9, 10, 11, 14, 15, 17}
+                        
 			for _, bit := range output_bits {
-				pigo.FunctionSelect(bit, pigo.OUTPUT)
+				gp.SetDirection(bit, pigo.Out)
 			}
-
-			value := byte(*display_value)
-	
+                        
+			value := pigo.Value(*display_value)
+                        
 			for i := uint(0); i < 8 ; i++ {
-				if (value >> i & 0x01) == 0 {
-					pigo.ClearOutput(output_bits[i])
-				} else {
-					pigo.SetOutput(output_bits[i])
-				}
-	
+                                gp.SetValue(output_bits[i], (value >> i & 0x01))
 			}
 		}
