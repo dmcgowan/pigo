@@ -47,3 +47,10 @@ sample.go (*go run sample.go -d 7* will set gpio 7, 8, 9 high and 10, 11, 14, 15
 				gp.SetValue(output_bits[i], (value >> i & 0x01))
 			}
 		}
+
+License
+-------
+
+MIT License, See LICENSE file
+
+Copyright (C) 2013 Derek McGowan
